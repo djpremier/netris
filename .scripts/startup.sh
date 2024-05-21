@@ -14,10 +14,10 @@ fi
 
 escaped_xarg=$(printf '%s\n' "$xarg" | sed -e 's/[\/&]/\\&/g')
 
-sed -i "s|^command.*=.*$|command=bash -c \"$escaped_xarg\"|" /etc/supervisor.d/game.ini
+sed "s|^command.*=.*$|command=bash -c \"$escaped_xarg\"|" /etc/supervisord.d/game.ini > tmp; cat tmp > file; rm tmp
 
-sed -i 's|^autostart.*=.*$|autostart=true|' /etc/supervisor.d/game.ini
+sed 's|^autostart.*=.*$|autostart=true|' /etc/supervisord.d/game.ini > tmp; cat tmp > file; rm tmp
 
 export SESSION_ID_INPUT="{$SESSION_ID}input"
 
-/usr/bin/supervisord -c /etc/supervisord.conf --nodaemon --user root
+/usr/bin/supervisord -c /etc/supervisord.conf

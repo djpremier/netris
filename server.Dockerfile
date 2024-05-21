@@ -1,6 +1,6 @@
 #This contains all the necessary libs for the server to work.
 #NOTE: KEEP THIS IMAGE AS LEAN AS POSSIBLE.
-FROM ghcr.io/wanjohiryan/netris/base:nightly
+FROM ghcr.io/netrisdotme/netris/base:nightly
 
 ENV TZ=UTC \
     SIZEW=1920 \
@@ -30,11 +30,6 @@ RUN mkdir -pm755 /etc/apt/keyrings && curl -fsSL -o /etc/apt/keyrings/winehq-arc
     && curl -fsSL -o /usr/bin/winetricks "https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks" \
     && chmod 755 /usr/bin/winetricks \
     && curl -fsSL -o /usr/share/bash-completion/completions/winetricks "https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks.bash-completion"
-
-#Install Proton
-COPY .scripts/proton /usr/bin/netris/
-RUN chmod +x /usr/bin/netris/proton \
-    && /usr/bin/netris/proton -i
 
 ARG USERNAME=netris \
     PUID=1000 \
@@ -68,11 +63,14 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     && echo "${USERNAME} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
     && ln -snf "/usr/share/zoneinfo/$TZ" /etc/localtime && echo "$TZ" > /etc/timezone
 
-COPY --from=ghcr.io/wanjohiryan/netris/warp:nightly /usr/bin/warp /usr/bin/
-COPY --from=ghcr.io/wanjohiryan/netris/warp-input:nightly /usr/bin/warp-input /usr/bin/warp-input
-RUN chmod +x /usr/bin/warp /usr/bin/warp-input
+COPY --from=ghcr.io/netrisdotme/netris/warp:nightly /usr/bin/warp /usr/bin/
+COPY --from=ghcr.io/netrisdotme/netris/warp-input:nightly /usr/bin/warp-input /usr/bin/warp-input
+COPY .scripts/proton /usr/bin/
+RUN chmod +x /usr/bin/warp /usr/bin/warp-input /usr/bin/proton
 COPY .scripts /etc/
 RUN chmod 755 /etc/supervisord.conf /etc/entrypoint.sh /etc/startup.sh
+
+RUN apt-get update && apt-get install -y libxdo-dev
 
 USER 1000
 ENV SHELL=/bin/bash \
